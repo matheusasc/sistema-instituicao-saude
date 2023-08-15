@@ -1,5 +1,7 @@
 #include <iostream>
 #include <vector>
+#include <stdio.h>
+#include <fstream>
 
 using namespace std;
 
@@ -48,6 +50,20 @@ void cadastrarProfissional(vector<Profissional*>& profissionais){
     cin >> profissional->nome;
     cout << "Digite o CPF: ";
     cin >> profissional->cpf;
+
+    //abrindo o arquivo com tipo de abertura w
+    ofstream arquivo("dados_profissionais.txt", ios::app);
+
+    //testando se o arquivo foi realmente criado
+     if(!arquivo){
+        cout << "Erro na abertura do arquivo" << endl;
+        return;
+    }
+
+    arquivo << profissional->nome << ", " << profissional->cpf << endl;
+    arquivo.close();
+
+    cout << "Dados gravados com sucesso" << endl;
 
     profissionais.push_back(profissional);
 }
