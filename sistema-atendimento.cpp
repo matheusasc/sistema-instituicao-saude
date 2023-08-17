@@ -26,6 +26,7 @@ struct Profissional {
 };
 
 struct Cliente {
+    int id;
     int codigo;
     string nome;
     string data_nascimento;
@@ -52,20 +53,21 @@ void cadastrarProfissional(vector<Profissional*>& profissionais){
     cin >> profissional->cpf;
 
     //abrindo o arquivo com tipo de abertura w
-    ofstream arquivo("dados_profissionais.txt", ios::app);
+    ofstream arquivoPro("dados_profissionais.txt", ios::app);
 
     //testando se o arquivo foi realmente criado
-     if(!arquivo){
-        cout << "Erro na abertura do arquivo" << endl;
+     if(!arquivoPro){
+        cout << "Erro na abertura do arquivo" << endl; 
         return;
     }
 
-    arquivo << profissional->nome << ", " << profissional->cpf << endl;
-    arquivo.close();
+    arquivoPro << profissional->nome << ", " << profissional->cpf << endl;
+    arquivoPro.close();
 
     cout << "Dados gravados com sucesso" << endl;
 
     profissionais.push_back(profissional);
+    proximoId++;
 }
 
 void exibirProfissionais(const vector<Profissional*>& profissionais){
@@ -89,18 +91,75 @@ void exibirProfissionais(const vector<Profissional*>& profissionais){
 }
 
 void cadastrarCliente(vector<Cliente*>& clientes){
+    static int proximoId = 1;
+    string nome;
+
     Cliente* cliente = new Cliente();
     cout << "Digite o nome do cliente: ";
     cin >> cliente->nome;
     cout << "Digite o codigo do cliente: ";
     cin >> cliente->codigo;
+
+    ofstream arquivoCli("dados_clientes.txt", ios::app);
+
+    if(!arquivoCli){
+        cout << "Erro na abertura do arquivo" << endl;
+        return;
+    }
+
+    arquivoCli << cliente->nome << ", " << cliente->codigo << endl;
+    arquivoCli.close();
     
     clientes.push_back(cliente);
+    proximoId++;
+}
+
+void exibirClientes(const vector<Cliente*>& clientes){
+    int linha = 9; // Inicia a partir da linha 9
+
+    gotoxy(1,5);
+    cout << "***************************  CLIENTES CADASTRADOS *****************************";
+    gotoxy(2,7);
+    cout << "id   Nome           Código";
+    for (const auto& cliente : clientes) {
+        gotoxy(2,linha);
+        cout << cliente->id << endl;
+        gotoxy(7,linha);
+        cout << cliente->nome << endl;
+        gotoxy(22,linha);
+        cout << cliente->codigo << endl;
+
+        linha++; // Incrementa a linha para a próxima exibição
+        cout << endl;
+    }
 }
 
 int main() {
     vector<Profissional*> profissionais;
-    char opcao; 
+    vector<Cliente*> clientes;
+    char opcaoMenu;
+    char opcaoProfissional; 
+
+    cout << "Bem-vindo ao Sistema de Saude!" << endl;
+    cout << "Escolha uma opcao:" << endl;
+    cout << "1. Cadastrar Profissional" << endl;
+    cout << "2. Cadastrar Cliente" << endl;
+    cout << "Digite o numero da opcao desejada: ";
+    cin >> opcaoMenu; 
+
+    switch (opcaoMenu) {
+        case 1:
+            cadastrarCliente(clientes);
+            break;
+        
+        case 2:
+            cadastrarProfissional(profissionais);
+
+    default:
+        cout << "Opção inválida!";
+        break;
+    }
+
 
     do{
         cadastrarProfissional(profissionais);
@@ -112,9 +171,9 @@ int main() {
         cout << "2. Editar um profissional" << endl;
         cout << "4. Sair" << endl;
         cout << "Digite o numero da opcao desejada: ";
-        cin >> opcao;
+        cin >> opcaoProfissional;
 
-        switch (opcao) {
+        switch (opcaoProfissional) {
             case '1':
                 //continuar cadastrando profissionais
                 break;
@@ -127,7 +186,7 @@ int main() {
             break;
         }
     } 
-    while (opcao != 3);
+    while (opcaoProfissional != 3);
     // Liberar a memória alocada para os usuários
     for (const auto& usuario : profissionais) {
         delete usuario;
