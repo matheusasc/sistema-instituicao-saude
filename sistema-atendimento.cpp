@@ -2,6 +2,7 @@
 #include <vector>
 #include <stdio.h>
 #include <fstream>
+#include <locale.h>
 
 using namespace std;
 
@@ -41,6 +42,7 @@ typedef struct {
     string data_atendimento;
     string descricao_atendimento;
 } Atendimento;
+
 
 void cadastrarProfissional(vector<Profissional*>& profissionais){
     static int proximoId = 1;  // Variável estática para armazenar o próximo ID disponível
@@ -134,17 +136,20 @@ void exibirClientes(const vector<Cliente*>& clientes){
     }
 }
 
-int main() {
+void telaCadastrar(){
+    setlocale(LC_ALL, "pt_BR.UTF-8");
     vector<Profissional*> profissionais;
     vector<Cliente*> clientes;
-    char opcaoMenu;
-    char opcaoProfissional; 
+    char opcaoMenu; 
 
-    cout << "Bem-vindo ao Sistema de Saude!" << endl;
-    cout << "Escolha uma opcao:" << endl;
-    cout << "1. Cadastrar Profissional" << endl;
-    cout << "2. Cadastrar Cliente" << endl;
-    cout << "Digite o numero da opcao desejada: ";
+    cout << endl;
+    cout << "╔═══════════════════════════ BEM-VINDO AO SISTEMA DE SAÚDE! ═══════════════════════════╗" << endl;
+    cout << "║ Escolha uma opcao:                                                                   ║" << endl;
+    cout << "║ 1. Cadastrar Profissional                                                            ║" << endl;
+    cout << "║ 2. Cadastrar Cliente                                                                 ║" << endl;
+    cout << "║ Digite o numero da opcao desejada:                                                   ║" << endl;
+    cout << "════════════════════════════════════════════════════════════════════════════════════════" << endl;
+    
     cin >> opcaoMenu; 
 
     switch (opcaoMenu) {
@@ -159,12 +164,22 @@ int main() {
         cout << "Opção inválida!";
         break;
     }
+}
 
+int main() {
+    setlocale(LC_ALL, "pt_BR.UTF-8");
+
+    vector<Profissional*> profissionais;
+    vector<Cliente*> clientes;
+    char opcaoProfissional; 
+
+    telaCadastrar();
 
     do{
         cadastrarProfissional(profissionais);
         system("cls");
         exibirProfissionais(profissionais);
+        system("cls");
 
         cout << "Escolha uma opcao: " << endl;
         cout << "1. Cadastrar mais um profissional" << endl;
