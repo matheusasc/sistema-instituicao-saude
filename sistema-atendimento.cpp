@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <fstream>
 #include <locale.h>
+#include <iomanip>
 
 using namespace std;
 
@@ -36,6 +37,10 @@ struct Cliente {
     string celular;
     string endereco;
     string cep;
+
+    Cliente(int id, const std::string& nome) : id(id), nome(nome) {
+        // Construtor da classe Usuario
+    }
 };
 
 typedef struct {
@@ -45,7 +50,7 @@ typedef struct {
 
 
 void cadastrarProfissional(vector<Profissional*>& profissionais){
-    static int proximoId = 1;  // Variável estática para armazenar o próximo ID disponível
+    static int proximoId = 0;  // Variável estática para armazenar o próximo ID disponível
     string nome;
 
     Profissional* profissional = new Profissional(proximoId, nome);
@@ -72,8 +77,59 @@ void cadastrarProfissional(vector<Profissional*>& profissionais){
     proximoId++;
 }
 
-void exibirProfissionais(const vector<Profissional*>& profissionais){
+void editarProfissionais(vector<Profissional*>& profissionais, int id){
+    string nome;
+    string cpf;
+
+    for(Profissional* profissional : profissionais) {
+        if(profissional->id) {
+            cout << "Digite o novo nome do profissional: " << endl;
+            cin >> nome;
+            cout << "Digite o novo CPF do profissional: " << endl;
+            cin >> cpf;
+
+            profissional->nome = nome;
+            profissional->cpf = cpf;
+
+            cout << "Dados do profissional atualizados com sucesso!" << endl;
+            return ;
+        }
+    }
+    cout << "Profissional com ID " << id << "não encontrado" << endl;
+}
+
+void listarProfissionaisCadastrados() {
+     int linha = 9; // Inicia a partir da linha 9
+
+    std::cout << "***************************  PROFISSIONAIS CADASTRADOS *****************************" << std::endl;
+    std::cout << "id   Nome           CPF" << std::endl;
+
+    std::ifstream arquivoPro("dados_profissionais.txt");
+    std::string linhaArquivo;
+
+    if (!arquivoPro) {
+        std::cout << "Erro na abertura do arquivo" << std::endl;
+        return;
+    }
+
+    while (getline(arquivoPro, linhaArquivo)) {
+        std::cout << std::setw(2) << linhaArquivo.substr(0, 2) << "   ";
+        std::cout << std::setw(15) << linhaArquivo.substr(3, 15) << "   ";
+        std::cout << linhaArquivo.substr(18) << std::endl;
+
+        linha++; // Incrementa a linha para a próxima exibição
+        std::cout << std::endl;
+    }
+
+    arquivoPro.close();
+}
+
+
+void telaCadastrar();
+
+void exibirProfissionais(vector<Profissional*>& profissionais){
     int linha = 9; // Inicia a partir da linha 9
+    char opcaoProfissional; 
 
     gotoxy(1,5);
     cout << "***************************  PROFISSIONAIS CADASTRADOS *****************************";
@@ -90,13 +146,46 @@ void exibirProfissionais(const vector<Profissional*>& profissionais){
         linha++; // Incrementa a linha para a próxima exibição
         cout << endl;
     }
+        cout << endl;
+        cout << "Escolha uma opcao: " << endl;
+        cout << "1. Cadastrar mais um profissional" << endl;
+        cout << "2. Editar um profissional" << endl;
+        cout << "3. Excluir um profissional" << endl;
+        cout << "4. Voltar ao menu" << endl;
+        cout << "Digite o numero da opcao desejada: ";
+        cin >> opcaoProfissional;
+
+        switch (opcaoProfissional) {
+            case '1':
+                        //continuar cadastrando profissionais
+                break;
+            case '2':
+                        //editar um profissional cadastrado
+                int id;
+                cout << "Digite o ID do profissional que deseja editar: ";
+                cin >> id;
+                editarProfissionais(profissionais, id);
+                system("cls");
+                exibirProfissionais(profissionais);
+            break;
+             case '3':
+            // Implemente a função para excluir um profissional
+            break;
+             case '4':
+                system("cls");
+                return telaCadastrar();
+            break;
+        default:
+            cout << "Opcao invalida. Tente novamente." <<endl;
+            break;
+        }
 }
 
 void cadastrarCliente(vector<Cliente*>& clientes){
     static int proximoId = 1;
     string nome;
 
-    Cliente* cliente = new Cliente();
+    Cliente* cliente = new Cliente(proximoId, nome);
     cout << "Digite o nome do cliente: ";
     cin >> cliente->nome;
     cout << "Digite o codigo do cliente: ";
@@ -141,24 +230,73 @@ void telaCadastrar(){
     vector<Profissional*> profissionais;
     vector<Cliente*> clientes;
     char opcaoMenu; 
+    char opcaoProfissional; 
+    char opcaoCliente;
 
     cout << endl;
     cout << "╔═══════════════════════════ BEM-VINDO AO SISTEMA DE SAÚDE! ═══════════════════════════╗" << endl;
     cout << "║ Escolha uma opcao:                                                                   ║" << endl;
     cout << "║ 1. Cadastrar Profissional                                                            ║" << endl;
-    cout << "║ 2. Cadastrar Cliente                                                                 ║" << endl;
+    cout << "║ 2. Listar Profissionais Cadastrados                                                  ║" << endl;
+    cout << "║ 3. Cadastrar Cliente                                                                 ║" << endl;
+    cout << "║ 4. Listar Clientes Cadastrados                                                       ║" << endl;
     cout << "║ Digite o numero da opcao desejada:                                                   ║" << endl;
     cout << "════════════════════════════════════════════════════════════════════════════════════════" << endl;
     
     cin >> opcaoMenu; 
 
     switch (opcaoMenu) {
-        case 1:
-            cadastrarCliente(clientes);
+        case '1':
+             do{
+                cadastrarProfissional(profissionais);
+                system("cls");
+                exibirProfissionais(profissionais);
+             }
+            while (opcaoProfissional != 3);
+            // Liberar a memória alocada para os usuários
+            for (const auto& usuario : profissionais) {
+                delete usuario;
+                /* code */
+            }
             break;
+
+        case '2':
+            listarProfissionaisCadastrados();
         
-        case 2:
-            cadastrarProfissional(profissionais);
+        case '3':
+            do{
+                cadastrarCliente(clientes);
+                system("cls");
+                exibirClientes(clientes);
+
+                cout << "Escolha uma opcao: " << endl;
+                cout << "1. Cadastrar mais um cliente" << endl;
+                cout << "2. Editar um cliente" << endl;
+                cout << "3. Editar um cliente" << endl;
+                cout << "4. Sair" << endl;
+                cout << "Digite o numero da opcao desejada: ";
+                cin >> opcaoCliente;
+
+                switch (opcaoCliente) {
+                    case '1':
+                        //continuar cadastrando profissionais
+                        break;
+                    case '2':
+                        int id;
+                        cout << "Digite o ID do profissional que deseja editar: ";
+                        //editar um profissional cadastrado
+                default:
+                    cout << "Opcao invalida. Tente novamente." <<endl;
+                    break;
+                }
+            } 
+            while (opcaoCliente != 3);
+            // Liberar a memória alocada para os usuários
+            for (const auto& usuario : clientes) {
+                delete usuario;
+                /* code */
+            }
+            break;
 
     default:
         cout << "Opção inválida!";
@@ -172,40 +310,10 @@ int main() {
     vector<Profissional*> profissionais;
     vector<Cliente*> clientes;
     char opcaoProfissional; 
+    char opcaoMenu; 
+    
+telaCadastrar();
 
-    telaCadastrar();
-
-    do{
-        cadastrarProfissional(profissionais);
-        system("cls");
-        exibirProfissionais(profissionais);
-        system("cls");
-
-        cout << "Escolha uma opcao: " << endl;
-        cout << "1. Cadastrar mais um profissional" << endl;
-        cout << "2. Editar um profissional" << endl;
-        cout << "4. Sair" << endl;
-        cout << "Digite o numero da opcao desejada: ";
-        cin >> opcaoProfissional;
-
-        switch (opcaoProfissional) {
-            case '1':
-                //continuar cadastrando profissionais
-                break;
-            case '2':
-                int id;
-                cout << "Digite o ID do profissional que deseja editar: ";
-                //editar um profissional cadastrado
-        default:
-            cout << "Opcao invalida. Tente novamente." <<endl;
-            break;
-        }
-    } 
-    while (opcaoProfissional != 3);
-    // Liberar a memória alocada para os usuários
-    for (const auto& usuario : profissionais) {
-        delete usuario;
-        /* code */
-    }
+   
     return 0;
 }
