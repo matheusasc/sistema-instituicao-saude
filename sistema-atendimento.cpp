@@ -3,7 +3,6 @@
 #include <stdio.h>
 #include <fstream>
 #include <locale.h>
-#include <iomanip>
 
 using namespace std;
 
@@ -13,13 +12,13 @@ void gotoxy(int x, int y) {
 
 struct Profissional {
     int id;
+    string matricula;
     string cpf;
     string nome;
     string tipo_profissal;
     string data_nascimento;
     string email;
     string telefone;
-    string matricula;
     string numero_registro;
 
      Profissional(int id, const std::string& nome) : id(id), nome(nome) {
@@ -58,6 +57,18 @@ void cadastrarProfissional(vector<Profissional*>& profissionais){
     cin >> profissional->nome;
     cout << "Digite o CPF: ";
     cin >> profissional->cpf;
+    cout << "Digite o Matrícula: ";
+    cin >> profissional->matricula;
+    cout << "Digite a especialidade médica: ";
+    cin >> profissional->tipo_profissal;
+    cout << "Digite o e-mail: ";
+    cin >> profissional->email;
+    cout << "Digite o telefone: ";
+    cin >> profissional->telefone;
+    cout << "Digite o número de registro: ";
+    cin >> profissional->numero_registro;
+    cout << "Digite a data de nascimento (DD-MM-AAAA): ";
+    cin >> profissional->data_nascimento;
 
     //abrindo o arquivo com tipo de abertura w
     ofstream arquivoPro("dados_profissionais.txt", ios::app);
@@ -68,7 +79,8 @@ void cadastrarProfissional(vector<Profissional*>& profissionais){
         return;
     }
 
-    arquivoPro << profissional->nome << ", " << profissional->cpf << endl;
+    arquivoPro << profissional->nome << ", " << profissional->cpf << "," << profissional->matricula << "," << profissional->tipo_profissal << ", " << 
+    profissional->data_nascimento << "," << profissional->email << "," << profissional->telefone << "," << profissional->numero_registro << endl;
     arquivoPro.close();
 
     cout << "Dados gravados com sucesso" << endl;
@@ -98,32 +110,39 @@ void editarProfissionais(vector<Profissional*>& profissionais, int id){
     cout << "Profissional com ID " << id << "não encontrado" << endl;
 }
 
+void excluirProfissional(vector<Profissional*>& profissionais) {
+    int id;
+    cout << "Digite o ID do profissional que deseja excluir: ";
+    cin >> id;
+
+    for (auto it = profissionais.begin(); it != profissionais.end(); ++it) {
+        if ((*it)->id == id) {
+            delete *it;
+            profissionais.erase(it);
+            cout << "Profissional removido com sucesso!" << endl;
+            return;
+        }
+    }
+
+    cout << "Profissional com o ID " << id << " não encontrado." << endl;
+}
+
 void listarProfissionaisCadastrados() {
-     int linha = 9; // Inicia a partir da linha 9
-
-    std::cout << "***************************  PROFISSIONAIS CADASTRADOS *****************************" << std::endl;
-    std::cout << "id   Nome           CPF" << std::endl;
-
-    std::ifstream arquivoPro("dados_profissionais.txt");
-    std::string linhaArquivo;
+    ifstream arquivoPro("dados_profissionais.txt");
+    string linha;
 
     if (!arquivoPro) {
-        std::cout << "Erro na abertura do arquivo" << std::endl;
+        cout << "Erro na abertura do arquivo" << endl;
         return;
     }
 
-    while (getline(arquivoPro, linhaArquivo)) {
-        std::cout << std::setw(2) << linhaArquivo.substr(0, 2) << "   ";
-        std::cout << std::setw(15) << linhaArquivo.substr(3, 15) << "   ";
-        std::cout << linhaArquivo.substr(18) << std::endl;
-
-        linha++; // Incrementa a linha para a próxima exibição
-        std::cout << std::endl;
+    cout << "Dados cadastrados:" << endl;
+    while (getline(arquivoPro, linha)) {
+        cout << linha << endl;
     }
 
     arquivoPro.close();
 }
-
 
 void telaCadastrar();
 
@@ -132,16 +151,28 @@ void exibirProfissionais(vector<Profissional*>& profissionais){
     char opcaoProfissional; 
 
     gotoxy(1,5);
-    cout << "***************************  PROFISSIONAIS CADASTRADOS *****************************";
+    cout << "*************************************************  PROFISSIONAIS CADASTRADOS ***************************************************";
     gotoxy(2,7);
-    cout << "id   Nome           CPF";
+    cout << "id   Nome         CPF            Matrícula      Especialidade     D. Nascimento    E-mail               Telefone      Registro";
     for (const auto& profissional : profissionais) {
         gotoxy(2,linha);
         cout << profissional->id << endl;
         gotoxy(7,linha);
         cout << profissional->nome << endl;
-        gotoxy(22,linha);
+        gotoxy(20,linha);
         cout << profissional->cpf << endl;
+        gotoxy(35,linha);
+        cout << profissional->matricula << endl;
+        gotoxy(50,linha);
+        cout << profissional->tipo_profissal << endl;
+        gotoxy(68,linha);
+        cout << profissional->data_nascimento << endl;
+        gotoxy(85,linha);
+        cout << profissional->email << endl;
+        gotoxy(106,linha);
+        cout << profissional->telefone << endl;
+        gotoxy(132,linha);
+        cout << profissional->numero_registro << endl;
 
         linha++; // Incrementa a linha para a próxima exibição
         cout << endl;
@@ -169,7 +200,9 @@ void exibirProfissionais(vector<Profissional*>& profissionais){
                 exibirProfissionais(profissionais);
             break;
              case '3':
-            // Implemente a função para excluir um profissional
+                excluirProfissional(profissionais);
+                system("cls");
+                exibirProfissionais(profissionais);
             break;
              case '4':
                 system("cls");
@@ -262,6 +295,7 @@ void telaCadastrar(){
 
         case '2':
             listarProfissionaisCadastrados();
+            break;
         
         case '3':
             do{
