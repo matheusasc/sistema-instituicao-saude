@@ -79,8 +79,8 @@ void cadastrarProfissional(vector<Profissional*>& profissionais){
         return;
     }
 
-    arquivoPro << profissional->nome << ", " << profissional->cpf << "," << profissional->matricula << "," << profissional->tipo_profissal << ", " << 
-    profissional->data_nascimento << "," << profissional->email << "," << profissional->telefone << "," << profissional->numero_registro << endl;
+    arquivoPro  << profissional->id << "    "   << profissional->nome << "      " << profissional->cpf << "      " << profissional->matricula << "          " << profissional->tipo_profissal << "    " << 
+    profissional->data_nascimento << "    " << profissional->email << "    " << profissional->telefone << "    " << profissional->numero_registro << endl;
     arquivoPro.close();
 
     cout << "Dados gravados com sucesso" << endl;
@@ -89,9 +89,31 @@ void cadastrarProfissional(vector<Profissional*>& profissionais){
     proximoId++;
 }
 
+void atualizarArquivoProfissionais(const vector<Profissional*>& profissionais) {
+    ofstream arquivoPro("dados_profissionais.txt", ios::trunc);  // Abre o arquivo para escrita, truncando o conteúdo antigo
+
+    if (!arquivoPro) {
+        cout << "Erro na abertura do arquivo" << endl;
+        return;
+    }
+
+    for (const auto& profissional : profissionais) {
+        arquivoPro  << profissional->id << "    "   << profissional->nome << "      " << profissional->cpf << "      " << profissional->matricula << "          " << profissional->tipo_profissal << "    " << 
+        profissional->data_nascimento << "    " << profissional->email << "    " << profissional->telefone << "    " << profissional->numero_registro << endl;
+    }
+
+    arquivoPro.close();
+}
+
 void editarProfissionais(vector<Profissional*>& profissionais, int id){
     string nome;
     string cpf;
+    string matricula;
+    string tipo_profissal;
+    string data_nascimento;
+    string email;
+    string telefone;
+    string numero_registro;
 
     for(Profissional* profissional : profissionais) {
         if(profissional->id) {
@@ -99,11 +121,32 @@ void editarProfissionais(vector<Profissional*>& profissionais, int id){
             cin >> nome;
             cout << "Digite o novo CPF do profissional: " << endl;
             cin >> cpf;
+            cout << "Digite a nova matricula do profissional: " << endl;
+            cin >> matricula;
+            cout << "Digite a nova especialidade do profissional: " << endl;
+            cin >> tipo_profissal;
+            cout << "Digite o nova data de nascimento do  profissional: " << endl;
+            cin >> data_nascimento;
+            cout << "Digite o novo email do profissional: " << endl;
+            cin >> email;
+            cout << "Digite o novo telefone do profissional: " << endl;
+            cin >> telefone;
+            cout << "Digite o novo numero do registro do profissional: " << endl;
+            cin >> numero_registro;
 
             profissional->nome = nome;
             profissional->cpf = cpf;
+            profissional->matricula = matricula;
+            profissional->tipo_profissal = tipo_profissal;
+            profissional->data_nascimento = data_nascimento;
+            profissional->email = email;
+            profissional->telefone = telefone;
+            profissional->numero_registro = numero_registro;
 
             cout << "Dados do profissional atualizados com sucesso!" << endl;
+
+            // Após editar, o arquivo será atualizado
+            atualizarArquivoProfissionais(profissionais);
             return ;
         }
     }
@@ -120,35 +163,93 @@ void excluirProfissional(vector<Profissional*>& profissionais) {
             delete *it;
             profissionais.erase(it);
             cout << "Profissional removido com sucesso!" << endl;
+
+            atualizarArquivoProfissionais(profissionais);
             return;
         }
     }
-
     cout << "Profissional com o ID " << id << " não encontrado." << endl;
-}
 
-void listarProfissionaisCadastrados() {
-    ifstream arquivoPro("dados_profissionais.txt");
-    string linha;
-
+        // Abrir o arquivo original em modo de leitura e escrita
+    fstream arquivoPro("dados_profissionais.txt", ios::in | ios::out);
     if (!arquivoPro) {
         cout << "Erro na abertura do arquivo" << endl;
         return;
     }
 
-    cout << "Dados cadastrados:" << endl;
-    while (getline(arquivoPro, linha)) {
-        cout << linha << endl;
+    // Criar um novo arquivo temporário
+    ofstream arquivoTemp("dados_profissionais_temp.txt");
+    if (!arquivoTemp) {
+        cout << "Erro na criação do arquivo temporário" << endl;
+        arquivoPro.close();
+        return;
     }
 
+    string linha;
+    bool encontrado = false;
+
+    // Percorrer o arquivo original linha por linha
+    while (getline(arquivoPro, linha)) {
+        // Extrair o ID da linha atual
+        int idLinha = stoi(linha.substr(0, linha.find(" ")));
+
+        // Verificar se o ID corresponde ao ID do profissional que será excluído
+        if (idLinha == id) {
+            encontrado = true;
+            continue; // Não copiar essa linha para o arquivo temporário
+        }
+
+        // Copiar a linha para o arquivo temporário
+        arquivoTemp << linha << endl;
+    }
+
+    // Fechar os arquivos
     arquivoPro.close();
+    arquivoTemp.close();
+
+    if (encontrado) {
+        // Excluir o arquivo original
+        remove("dados_profissionais.txt");
+
+        // Renomear o arquivo temporário com o nome do arquivo original
+        rename("dados_profissionais_temp.txt", "dados_profissionais.txt");
+
+        cout << "Profissional removido do arquivo com sucesso!" << endl;
+    } else {
+        // Excluir o arquivo temporário
+        remove("dados_profissionais_temp.txt");
+
+        cout << "Profissional com o ID " << id << " não encontrado no arquivo." << endl;
+    }
 }
+
+// void listarProfissionaisCadastrados() {
+//     ifstream arquivoPro("dados_profissionais.txt");
+//     string linha;
+
+//     cout << "*************************************************  PROFISSIONAIS CADASTRADOS ***************************************************" << endl;
+//     cout << "Nome         CPF               Matrícula      Especialidade     D. Nascimento    E-mail               Telefone      Registro" << endl;
+
+//     if (!arquivoPro) {
+//         cout << "Erro na abertura do arquivo" << endl;
+//         return;
+//     }
+
+//     cout << "Dados cadastrados:" << endl;
+//     while (getline(arquivoPro, linha)) {
+//         cout << linha << endl;
+//     }
+
+//     arquivoPro.close();
+// }
 
 void telaCadastrar();
 
 void exibirProfissionais(vector<Profissional*>& profissionais){
     int linha = 9; // Inicia a partir da linha 9
     char opcaoProfissional; 
+    ifstream arquivoPro("dados_profissionais.txt");
+    string linhaArq;
 
     gotoxy(1,5);
     cout << "*************************************************  PROFISSIONAIS CADASTRADOS ***************************************************";
@@ -177,6 +278,18 @@ void exibirProfissionais(vector<Profissional*>& profissionais){
         linha++; // Incrementa a linha para a próxima exibição
         cout << endl;
     }
+
+   if (!arquivoPro) {
+    cout << "Erro na abertura do arquivo" << endl;
+    return;
+    }
+
+    cout << endl;
+    while (getline(arquivoPro, linhaArq)) {
+        cout << linhaArq << endl;
+    }
+    arquivoPro.close();
+
         cout << endl;
         cout << "Escolha uma opcao: " << endl;
         cout << "1. Cadastrar mais um profissional" << endl;
@@ -255,7 +368,9 @@ void exibirClientes(const vector<Cliente*>& clientes){
 
         linha++; // Incrementa a linha para a próxima exibição
         cout << endl;
+
     }
+
 }
 
 void telaCadastrar(){
@@ -294,7 +409,8 @@ void telaCadastrar(){
             break;
 
         case '2':
-            listarProfissionaisCadastrados();
+            system("cls");
+            exibirProfissionais(profissionais);
             break;
         
         case '3':
